@@ -59,7 +59,7 @@ def main():
         'trial_no': 10 ** 7,
         'save_period': 1000,
         'records_per_file': 1000,
-        'save_dir': '/home/users/a0112184/simulate/run',
+        'save_dir': '/home/users/nus/a0112184/simulate/run',
         'print_period': 0,
         'num_repeat': 10,
     }
