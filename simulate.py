@@ -154,6 +154,47 @@ def simulate_true(
     return
 
 
+def simulate_repeat(
+        length,
+        chain_type='wild_type',
+        run_id=0,
+        spring_len=1,
+        spring_const=1,
+        atom_radius=1,
+        epsilon=1,
+        boltzmann_const=1,
+        temperature=1,
+        max_dist=1,
+        start_dist=1,
+        trial_no=10000000,
+        save_period=1000,
+        records_per_file=100,
+        save_dir=None,
+        print_period=0,
+        num_repeat=1,
+):
+    for i in range(num_repeat):
+        simulate_true(
+            length=length,
+            chain_type=chain_type,
+            run_id=run_id,
+            spring_len=spring_len,
+            spring_const=spring_const,
+            atom_radius=atom_radius,
+            epsilon=epsilon,
+            boltzmann_const=boltzmann_const,
+            temperature=temperature,
+            max_dist=max_dist,
+            start_dist=start_dist,
+            trial_no=trial_no,
+            save_period=save_period,
+            records_per_file=records_per_file,
+            save_dir=save_dir,
+            print_period=print_period,
+        )
+    return
+
+
 def simulate(
         length,
         chain_type='wild_type',
