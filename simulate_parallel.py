@@ -34,7 +34,8 @@ def main():
         'trial_no': 10 ** 6,
         'save_period': 1000,
         'records_per_file': 100,
-        'save_dir': 'D:/Coding Projects/Python/FYP/run',
+        # 'save_dir': 'D:/Coding Projects/Python/FYP/run',
+        'save_dir': '/home/users/a0112184/simulate/run',
         'print_period': 0,
     }
     num_proc = 5
