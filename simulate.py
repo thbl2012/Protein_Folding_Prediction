@@ -1,10 +1,11 @@
 import os
 import time
+import numpy as np
 
 from matplotlib import pyplot
 
-from atom_chain import *
-from item import *
+from atom_chain import AtomChain, straight_chain, wild_type
+from item import get_filename, to_item, load_or_make_items, save_items, iadd_items
 
 # Storage parameters
 STATUS_FILE = 'status.txt'
@@ -16,7 +17,8 @@ COLORS = {'energy': 'k', 'spring': 'r', 'lennard': 'g', 'coulomb': 'b'}
 
 
 def simulate_sandbox(
-        charges,
+        length,
+        chain_type='wild_type',
         spring_len=1,
         spring_const=1,
         atom_radius=1,
@@ -34,6 +36,9 @@ def simulate_sandbox(
         print_period=0,
 ):
     # Set up simulation
+    charges = None
+    if chain_type == 'wild_type':
+        charges = wild_type(length)
     chain = AtomChain(
         straight_chain(len(charges), start_dist),
         charges,
@@ -87,7 +92,8 @@ def simulate_sandbox(
 
 
 def simulate_true(
-        charges,
+        length,
+        chain_type='wild_type',
         run_id=0,
         spring_len=1,
         spring_const=1,
@@ -104,6 +110,9 @@ def simulate_true(
         print_period=0,
 ):
     # Set up simulation
+    charges = None
+    if chain_type == 'wild_type':
+        charges = wild_type(length)
     if save_dir is None:
         save_dir = 'D:/Coding Projects/Python/FYP/run'
     os.makedirs('{}/run_{:04d}'.format(save_dir, run_id), exist_ok=True)
@@ -169,13 +178,10 @@ def simulate(
         fig_out=None,
         print_period=0,
 ):
-    charges = None
-    if chain_type == 'wild_type':
-        charges = wild_type(length)
-
     if sandbox:
         simulate_sandbox(
-            charges,
+            length,
+            chain_type=chain_type,
             spring_len=spring_len,
             spring_const=spring_const,
             epsilon=epsilon,
@@ -193,7 +199,8 @@ def simulate(
         )
     else:
         simulate_true(
-            charges,
+            length,
+            chain_type=chain_type,
             run_id=run_id,
             spring_len=spring_len,
             spring_const=spring_const,
@@ -214,6 +221,7 @@ def simulate(
 
 def main():
     model_params = {
+        'length': 30,
         'chain_type': 'wild_type',
         'spring_const': 1,
         'spring_len': 0.5,
@@ -231,14 +239,14 @@ def main():
         'fig_out': 'figs/test.png',
     }
     run_params = {
-        'trial_no': 10 ** 7,
+        'trial_no': 10 ** 6,
         'save_period': 1000,
-        'records_per_file': 1000,
+        'records_per_file': 100,
         'save_dir': 'D:/Coding Projects/Python/FYP/run',
-        'print_period': 10000,
+        'print_period': 0,
     }
     start = time.time()
-    simulate(30, sandbox=True, **model_params, **plot_params, **run_params)
+    simulate(sandbox=False, **model_params, **plot_params, **run_params)
     print('Simulation done in {:.2f} minutes'.format((time.time() - start) / 60))
 
 
