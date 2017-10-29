@@ -1,4 +1,5 @@
 import os
+import time
 
 from matplotlib import pyplot
 
@@ -29,7 +30,8 @@ def simulate_sandbox(
         max_plot_buffer=10000,
         show=False,
         verbose=False,
-        fig_out=None
+        fig_out=None,
+        print_period=0,
 ):
     # Set up simulation
     chain = AtomChain(
@@ -65,8 +67,8 @@ def simulate_sandbox(
                 plot[plot_count] = getattr(chain, label)
             trial_plot[plot_count] = t
             plot_count += 1
-            if t % 1000 == 0:
-                print(t)
+        if print_period > 0 and t % print_period == 0:
+            print(t)
         if plot_count == max_plot_buffer or t == trial_no:
             for label, plot in plots.items():
                 pyplot.plot(trial_plot, plot, label=label, color=COLORS[label], **kwargs)
@@ -98,9 +100,13 @@ def simulate_true(
         trial_no=10000000,
         save_period=1000,
         records_per_file=100,
+        save_dir=None,
+        print_period=0,
 ):
     # Set up simulation
-    os.makedirs('run/run_{:03d}'.format(run_id), exist_ok=True)
+    if save_dir is None:
+        save_dir = 'D:/Coding Projects/Python/FYP/run'
+    os.makedirs('{}/run_{:04d}'.format(save_dir, run_id), exist_ok=True)
     chain = AtomChain(
         straight_chain(len(charges), start_dist),
         charges,
@@ -116,12 +122,13 @@ def simulate_true(
     t = 0
     accepted_count = 0
     threshold = save_period * records_per_file
-    num_files = (trial_no-1)//threshold + 1
+    num_records = trial_no // save_period
+    num_files = int(np.ceil(num_records / records_per_file))
     num_features = len(charges) * 3
 
     # Begin simulation
     for file_count in range(1, num_files+1):
-        filename = get_filename(run_id, file_count, threshold)
+        filename = get_filename(save_dir, run_id, file_count, threshold)
         items = load_or_make_items(filename, num_features, t+save_period,
                                    t+threshold+save_period, save_period)
         for i in range(threshold):
@@ -129,15 +136,18 @@ def simulate_true(
             accepted_count += accepted
             t += 1
             if t % save_period == 0:
-                items[i//save_period] += to_item(t, chain.atoms)
+                iadd_items(items[i//save_period], to_item(t, chain.atoms))
+            if print_period > 0 and t % print_period == 0:
+                print(t)
             if t == trial_no:
                 break
-        save_items(items, filename)
+        save_items(filename, items)
     return
 
 
 def simulate(
-        charges,
+        length,
+        chain_type='wild_type',
         run_id=0,
         sandbox=True,
         spring_len=1,
@@ -151,12 +161,18 @@ def simulate(
         trial_no=10000000,
         save_period=1000,
         records_per_file=100,
+        save_dir=None,
         plot_period=10,
         max_plot_buffer=10000,
         show=False,
         verbose=False,
-        fig_out=None
+        fig_out=None,
+        print_period=0,
 ):
+    charges = None
+    if chain_type == 'wild_type':
+        charges = wild_type(length)
+
     if sandbox:
         simulate_sandbox(
             charges,
@@ -172,7 +188,8 @@ def simulate(
             max_plot_buffer=max_plot_buffer,
             show=show,
             verbose=verbose,
-            fig_out=fig_out
+            fig_out=fig_out,
+            print_period=print_period,
         )
     else:
         simulate_true(
@@ -188,13 +205,16 @@ def simulate(
             start_dist=start_dist,
             trial_no=trial_no,
             save_period=save_period,
-            records_per_file=records_per_file
+            records_per_file=records_per_file,
+            save_dir=save_dir,
+            print_period=print_period,
         )
     return
 
 
-if __name__ == '__main__':
+def main():
     model_params = {
+        'chain_type': 'wild_type',
         'spring_const': 1,
         'spring_len': 0.5,
         'atom_radius': 1,
@@ -205,14 +225,22 @@ if __name__ == '__main__':
         'start_dist': 1,
     }
     plot_params = {
-        'trial_no': 10 ** 5,
         'plot_period': 100,
         'max_plot_buffer': 100000,
         'verbose': True,
         'fig_out': 'figs/test.png',
     }
-    save_params = {
-        'save_period': 100,
-        'records_per_file': 100,
+    run_params = {
+        'trial_no': 10 ** 7,
+        'save_period': 1000,
+        'records_per_file': 1000,
+        'save_dir': 'D:/Coding Projects/Python/FYP/run',
+        'print_period': 10000,
     }
-    simulate(wild_type(30), sandbox=False, **model_params, **plot_params, **save_params)
+    start = time.time()
+    simulate(30, sandbox=True, **model_params, **plot_params, **run_params)
+    print('Simulation done in {:.2f} minutes'.format((time.time() - start) / 60))
+
+
+if __name__ == '__main__':
+    main()

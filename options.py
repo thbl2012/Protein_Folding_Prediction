@@ -1,4 +1,5 @@
 import numpy as np
+import multiprocessing as mp
 import pandas as pd
 from scipy.spatial.distance import *
 from scipy.spatial import distance_matrix
@@ -148,4 +149,19 @@ def concat2(a, b, la, lb):
     x[3:(la+3)] = a
     x[(la+3):(la+lb+3)] = b
     return x
+
+
+def repeat(s, num=1):
+    print(s * num)
+
+
+def irepeat(args):
+    s, kw = args
+    repeat(s, kw.get('num'))
+
+
+def multiproc_kwarg():
+    pool = mp.Pool(3)
+    kw = {'num': 5}
+    pool.map(irepeat, [('a', kw), ('b', kw), ('c', kw)])
 

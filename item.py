@@ -55,42 +55,43 @@ class Item:
         ])
 
 
-def get_filename(run_id, file_count, threshold):
-    return 'run_{:03d}/items_{:07d}.npy'.format(run_id, file_count * threshold)
+def get_filename(save_dir, run_id, file_count, threshold):
+    return '{}/run_{:04d}/items_{:08d}.npy'.format(save_dir, run_id, file_count * threshold)
 
 
 def to_item(t, atoms):
     features = atoms.reshape(-1)
     pairwise_prods = features * features.reshape(-1, 1)
-    return np.concatenate((np.array((t, len(features), 1)), features, pairwise_prods))
+    return np.concatenate((np.array((t, len(features), 1)), features, pairwise_prods.reshape(-1)))
 
 
 def save_items(filename, items):
     np.save(filename, items.T, allow_pickle=False, fix_imports=False)
 
 
-def load_or_make_items(filename, length, start_t, end_t, save_period):
+def load_or_make_items(filename, num_features, start_t, end_t, save_period):
     try:
         items = np.load(filename, allow_pickle=False, fix_imports=False, encoding='bytes').T
+        items[:, 2] = np.floor(items[:, 2])
     except FileNotFoundError:
-        item_length = length * length + length + 3
+        item_length = num_features * num_features + num_features + 3
         list_t = np.arange(start_t, end_t, save_period)
         items = np.zeros((len(list_t), item_length), dtype=np.float64)
-        items[:, 1].fill(length)
+        items[:, 1].fill(num_features)
         items[:, 0] = list_t
     return items
 
 
 def get_t(item):
-    return item[0]
+    return int(item[0])
 
 
 def get_age(item):
-    return item[2]
+    return int(item[2])
 
 
 def get_len(item):
-    return item[1]
+    return int(item[1])
 
 
 def set_t(item, t):
@@ -107,6 +108,6 @@ def set_len(item, length):
 
 def iadd_items(item1, item2):
     # item1 += item2
-    assert get_t(item1) == get_t(item2), 'Unable to add, t are different'
-    assert get_len(item1) == get_len(item2), 'Unable to add, lengths are different'
+    assert get_t(item1) == get_t(item2), 'Unable to add, t are different: {} {}'.format(get_t(item1), get_t(item2))
+    assert get_len(item1) == get_len(item2), 'Unable to add, lengths are different: {} {}'.format(get_len(item1), get_len(item2))
     item1[2:] += item2[2:]

@@ -2,4 +2,8 @@
 chains/
 figs/
 report/
+run/
+__pycache__/
 test_options/
+test_item.npy
+test_item.py
