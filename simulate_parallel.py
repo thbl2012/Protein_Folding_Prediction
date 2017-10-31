@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import time
 
-from simulate import simulate_repeat
+from old_simulate import simulate_repeat
 
 
 def simulate_wrapper(sim_params):
@@ -38,7 +38,7 @@ def main_local():
         'print_period': 0,
         'num_repeat': 1,
     }
-    num_proc = 100
+    num_proc = 8
     start = time.time()
     simulate_parallel(num_proc, sim_params)
     print('{} simulations done in {:.2f} minutes'.format(num_proc, (time.time() - start) / 60))
@@ -68,4 +68,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_local()

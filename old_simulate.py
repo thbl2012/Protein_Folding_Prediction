@@ -82,13 +82,11 @@ def simulate_sandbox(
             trial_plot.fill(0)
             plot_count = 0
 
-    # Post simulation
-    print(accepted_count / trial_no)
     if fig_out:
         pyplot.savefig(fig_out, format='png', dpi=600)
     if show:
         pyplot.show()
-    return
+    return accepted_count / trial_no
 
 
 def simulate_true(
@@ -151,7 +149,7 @@ def simulate_true(
             if t == trial_no:
                 break
         save_items(filename, items)
-    return
+    return accepted_count / trial_no
 
 
 def simulate_repeat(
@@ -173,8 +171,9 @@ def simulate_repeat(
         print_period=0,
         num_repeat=1,
 ):
+    accepted_rate_sum = 0
     for i in range(num_repeat):
-        simulate_true(
+        accepted_count = simulate_true(
             length=length,
             chain_type=chain_type,
             run_id=run_id,
@@ -192,7 +191,8 @@ def simulate_repeat(
             save_dir=save_dir,
             print_period=print_period,
         )
-    return
+        accepted_rate_sum += accepted_count / trial_no
+    return accepted_rate_sum / num_repeat
 
 
 def simulate(
@@ -220,7 +220,7 @@ def simulate(
         print_period=0,
 ):
     if sandbox:
-        simulate_sandbox(
+        return simulate_sandbox(
             length,
             chain_type=chain_type,
             spring_len=spring_len,
@@ -239,7 +239,7 @@ def simulate(
             print_period=print_period,
         )
     else:
-        simulate_true(
+        return simulate_true(
             length,
             chain_type=chain_type,
             run_id=run_id,
@@ -257,7 +257,6 @@ def simulate(
             save_dir=save_dir,
             print_period=print_period,
         )
-    return
 
 
 def main():
@@ -275,20 +274,21 @@ def main():
     }
     plot_params = {
         'plot_period': 100,
-        'max_plot_buffer': 100000,
+        'max_plot_buffer': 1000,
         'verbose': True,
         'fig_out': 'figs/test.png',
     }
     run_params = {
-        'trial_no': 10 ** 6,
+        'trial_no': 10 ** 3,
         'save_period': 1000,
         'records_per_file': 100,
         'save_dir': 'D:/Coding Projects/Python/FYP/run',
         'print_period': 0,
     }
     start = time.time()
-    simulate(sandbox=False, **model_params, **plot_params, **run_params)
-    print('Simulation done in {:.2f} minutes'.format((time.time() - start) / 60))
+    accept_rate = simulate(sandbox=True, run_id=111, **model_params, **plot_params, **run_params)
+    print('Simulation done in {:.2f} seconds'.format((time.time() - start)))
+    print('Acceptance rate: {:.2f}'.format(accept_rate))
 
 
 if __name__ == '__main__':

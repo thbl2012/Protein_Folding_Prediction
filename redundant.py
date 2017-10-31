@@ -1,4 +1,4 @@
-from simulate import *
+from old_simulate import *
 
 
 def read_chain(file):
