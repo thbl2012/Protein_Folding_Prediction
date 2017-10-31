@@ -5,7 +5,7 @@ Protein Chain folding simulation. Equilibrium reached when energy is minimum. Ch
 Find a method to determine the short term dynamics in protein chains, i.e. a formula.
 
 ## Short Term Goal
-Find a way to mutate some atoms in the chain so that the resulting correlation matrices become vastly different from the Wild Type &rarr These atoms are more influential.
+Find a way to mutate some atoms in the chain so that the resulting correlation matrices become vastly different from the Wild Type &rarr; These atoms are more influential.
 
 ## Procedure
 
