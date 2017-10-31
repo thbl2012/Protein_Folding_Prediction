@@ -20,8 +20,8 @@ Find a way to mutate some atoms in the chain so that the resulting correlation m
 
 ## Tasks
 
-- [] Pymol: Know how to align protein chains and visualize their 3D position.
-- [] Centroid method: Know how to extract the 1000 configuration and get the centroid.
-- [] PCA: Know how to plot the eigenvalues (scipy.linalg.eig), how to take the First Principal Vector and their differences.
-- [] Matrix Manifolds: Know how to compute distance in a matrix manifold and tell if two matrix are similar or very different.
-- [] Keywords: matrix manifolds, symmetric positive definite matrix manifolds.
+- [ ] Pymol: Know how to align protein chains and visualize their 3D position.
+- [ ] Centroid method: Know how to extract the 1000 configuration and get the centroid.
+- [ ] PCA: Know how to plot the eigenvalues (scipy.linalg.eig), how to take the First Principal Vector and their differences.
+- [ ] Matrix Manifolds: Know how to compute distance in a matrix manifold and tell if two matrix are similar or very different.
+- [ ] Keywords: matrix manifolds, symmetric positive definite matrix manifolds.
