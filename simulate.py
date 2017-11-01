@@ -14,7 +14,7 @@ STT_PREFIX = 'atoms'
 FIG_PREFIX = 'fig'
 
 
-def simulate_equilibrium(
+def simulate_equil(
         # Input chain parameters
         length,
         chain_type='wild_type',
@@ -41,6 +41,7 @@ def simulate_equilibrium(
 
         # Info parameters
         print_period=0,
+        chain_out=None
 ):
     # Set up colors
     if not colors:
@@ -94,10 +95,12 @@ def simulate_equilibrium(
     # Save figure and chain
     if fig_out:
         pyplot.savefig(fig_out, format='png', dpi=600)
+    if chain_out:
+        np.save(chain_out, chain.atoms, allow_pickle=False, fix_imports=False)
     return chain
 
 
-def sample_equil(chain, num_equiv=5000000, num_sample=1000):
+def sample_equil(chain, num_equiv=5000000, num_sample=1000, samples_out=None):
     samples = np.empty((num_sample, chain.atoms.shape[0], chain.atoms.shape[1]), dtype=np.float64)
     indices = np.array(random.sample(range(num_equiv), num_sample), dtype=np.int32).sort()
     i = 0
@@ -106,6 +109,9 @@ def sample_equil(chain, num_equiv=5000000, num_sample=1000):
         if t == indices[i]:
             samples[i] = chain.atoms
             i += 1
+    if samples_out:
+        np.save(samples_out, samples.reshape(len(samples), -1),
+                allow_pickle=False, fix_imports=False)
     return samples
 
 
@@ -124,7 +130,7 @@ def simulate_short(
         (trial_no//save_period, chain.atoms.shape[0], chain.atoms.shape[1]),
         dtype=np.float64
     )
-    for t in range(trial_no):
+    for t in range(1, trial_no+1):
         chain.mutate(max_dist)
         if t % save_period == 0:
             states[t//save_period] = chain.atoms
