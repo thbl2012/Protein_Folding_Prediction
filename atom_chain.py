@@ -9,8 +9,6 @@ class AtomChain:
                  spring_len=1,
                  atom_radius=1,
                  epsilon=1,
-                 max_dist=1,
-                 start_dist=1,
                  boltzmann_const=1,
                  temperature=1):
         self.atoms = atoms
@@ -27,10 +25,8 @@ class AtomChain:
         self.spring_const = spring_const
         self.spring_len = spring_len
         self.epsilon = epsilon
-        self.max_dist = max_dist
         self.boltzmann_const = boltzmann_const
         self.temperature = temperature
-        self.start_dist = start_dist
 
     def get_trial_dist_vector(self, p):
         return distance_matrix(self.atoms, p[None, :]).reshape(-1)
@@ -64,11 +60,10 @@ class AtomChain:
         new = new*new*new*new*new*new
         return np.sum(new*new - new - old*old + old) * self.epsilon * 4
 
-    def mutate(self):
-        s = self.max_dist
+    def mutate(self, max_dist):
         rand = np.random.RandomState()
         i = rand.randint(0, len(self.atoms) - 1)
-        p = random_position(self.atoms[i], s)
+        p = random_position(self.atoms[i], max_dist)
 
         # Compute energy difference
         v = self.get_trial_dist_vector(p)
@@ -88,3 +83,14 @@ class AtomChain:
             accepted = 1
         self.last_index = i
         return accepted
+
+    def __copy__(self):
+        return AtomChain(
+            self.atoms, self.charges,
+            spring_const=self.spring_const,
+            spring_len=self.spring_len,
+            atom_radius=self.atom_radius,
+            epsilon=self.epsilon,
+            boltzmann_const=self.boltzmann_const,
+            temperature=self.temperature
+        )

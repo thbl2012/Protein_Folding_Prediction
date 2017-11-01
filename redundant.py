@@ -1,3 +1,7 @@
+from typing import Optional
+
+from typing.io import IO
+
 from old_simulate import *
 
 
@@ -16,7 +20,7 @@ def read_chain(file):
 
 
 def save_chain(atoms, filename):
-    with open(filename, 'w') as file:
+    with open(filename, 'w') as file:  # type: Optional[IO[str]]
         for a in atoms:
             print(*a, sep=',', file=file)
 

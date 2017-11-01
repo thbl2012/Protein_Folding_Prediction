@@ -1,6 +1,7 @@
 import os
-import time
 import numpy as np
+import multiprocessing as mp
+import time
 
 from matplotlib import pyplot
 
@@ -46,8 +47,6 @@ def simulate_sandbox(
         spring_len=spring_len,
         atom_radius=atom_radius,
         epsilon=epsilon,
-        max_dist=max_dist,
-        start_dist=start_dist,
         boltzmann_const=boltzmann_const,
         temperature=temperature
     )
@@ -65,7 +64,7 @@ def simulate_sandbox(
 
     # Begin simulation
     for t in range(1, trial_no+1):
-        accepted = chain.mutate()
+        accepted = chain.mutate(max_dist)
         accepted_count += accepted
         if t % plot_period == 0:
             for label, plot in plots.items():
@@ -121,8 +120,6 @@ def simulate_true(
         spring_len=spring_len,
         atom_radius=atom_radius,
         epsilon=epsilon,
-        max_dist=max_dist,
-        start_dist=start_dist,
         boltzmann_const=boltzmann_const,
         temperature=temperature
     )
@@ -139,7 +136,7 @@ def simulate_true(
         items = load_or_make_items(filename, num_features, t+save_period,
                                    t+threshold+save_period, save_period)
         for i in range(threshold):
-            accepted = chain.mutate()
+            accepted = chain.mutate(max_dist)
             accepted_count += accepted
             t += 1
             if t % save_period == 0:
@@ -289,6 +286,46 @@ def main():
     accept_rate = simulate(sandbox=True, run_id=111, **model_params, **plot_params, **run_params)
     print('Simulation done in {:.2f} seconds'.format((time.time() - start)))
     print('Acceptance rate: {:.2f}'.format(accept_rate))
+
+
+def simulate_wrapper(sim_params):
+    simulate_repeat(**sim_params)
+
+
+def simulate_parallel(num_proc, sim_params):
+    # num_proc <= 1000
+    params_lst = []
+    for i in range(num_proc):
+        params = sim_params.copy()
+        params.update(run_id=i)
+        params_lst.append(params)
+    pool = mp.Pool()
+    pool.map(simulate_wrapper, params_lst)
+
+
+def main_local():
+    sim_params = {
+        'length': 30,
+        'chain_type': 'wild_type',
+        'spring_const': 1,
+        'spring_len': 0.5,
+        'atom_radius': 1,
+        'epsilon': 1,
+        'boltzmann_const': 1,
+        'temperature': 1,
+        'max_dist': 0.5,
+        'start_dist': 1,
+        'trial_no': 10 ** 6,
+        'save_period': 1000,
+        'records_per_file': 100,
+        'save_dir': 'D:/Coding Projects/Python/FYP/run',
+        'print_period': 0,
+        'num_repeat': 1,
+    }
+    num_proc = 8
+    start = time.time()
+    simulate_parallel(num_proc, sim_params)
+    print('{} simulations done in {:.2f} minutes'.format(num_proc, (time.time() - start) / 60))
 
 
 if __name__ == '__main__':
