@@ -8,3 +8,4 @@ backup/
 test_options/
 test_item.npy
 test_item.py
+*.png

@@ -1,0 +1,20 @@
+wild_type:
+free all atoms
+repeat 5 times save all images put side by side
+try:
+run only 101 mcs
+repeat only for 10,100 times for the correlation
+generate 500 correlation matrics
+
+2-0--2-0-2... WT
+2-2-2-2...
+2-0-2-0...
+0-0-0-0...
+0*n - WT
+2*n - WT
+-2*n - WT
+
+WT -0*n - WT
+WT - 2*n - WT
+
+convolutional neural network

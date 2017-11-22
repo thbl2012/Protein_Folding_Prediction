@@ -5,28 +5,37 @@ from util import *
 
 class AtomChain:
     def __init__(self, atoms, charges,
-                 spring_const=1,
-                 spring_len=1,
-                 atom_radius=1,
-                 epsilon=1,
-                 boltzmann_const=1,
-                 temperature=1):
+                 spring_const=1., spring_len=1.,
+                 atom_radius=1., epsilon=1.,
+                 boltzmann_const=1., temperature=1.,
+                 charge_matrix=None, dist_matrix=None,
+                 lennard=0., spring=0., coulomb=0.,
+                 energy=0., last_index=None,
+                 rebuild=False,):
         self.atoms = atoms
         self.charges = charges
-        self.dist_matrix = pairwise_dist(atoms)
-        self.charge_matrix = pairwise_charges(charges)
-        self.spring = spring_energy(self.dist_matrix, spring_len, spring_const)
-        self.lennard = lennard_energy(self.dist_matrix, atom_radius, epsilon)
-        self.coulomb = coulomb_energy(self.dist_matrix, charges)
-        self.energy = self.spring + self.lennard + self.coulomb
-        self.last_index = None
-
         self.atom_radius = atom_radius
         self.spring_const = spring_const
         self.spring_len = spring_len
         self.epsilon = epsilon
         self.boltzmann_const = boltzmann_const
         self.temperature = temperature
+        if rebuild:
+            self.dist_matrix = pairwise_dist(atoms)
+            self.charge_matrix = pairwise_charges(charges)
+            self.spring = spring_energy(self.dist_matrix, spring_len, spring_const)
+            self.lennard = lennard_energy(self.dist_matrix, atom_radius, epsilon)
+            self.coulomb = coulomb_energy(self.dist_matrix, self.charge_matrix)
+            self.energy = self.spring + self.lennard + self.coulomb
+            self.last_index = last_index
+        else:
+            self.dist_matrix = dist_matrix
+            self.charge_matrix = charge_matrix
+            self.spring = spring
+            self.lennard = lennard
+            self.coulomb = coulomb
+            self.energy = energy
+            self.last_index = None
 
     def get_trial_dist_vector(self, p):
         return distance_matrix(self.atoms, p[None, :]).reshape(-1)
@@ -62,7 +71,7 @@ class AtomChain:
 
     def mutate(self, max_dist):
         rand = np.random.RandomState()
-        i = rand.randint(0, len(self.atoms) - 1)
+        i = rand.randint(0, len(self.atoms))
         p = random_position(self.atoms[i], max_dist)
 
         # Compute energy difference
@@ -84,7 +93,15 @@ class AtomChain:
         self.last_index = i
         return accepted
 
-    def __copy__(self):
+    def recompute(self):
+        self.dist_matrix = pairwise_dist(self.atoms)
+        self.charge_matrix = pairwise_charges(self.charges)
+        self.spring = spring_energy(self.dist_matrix, self.spring_len, self.spring_const)
+        self.lennard = lennard_energy(self.dist_matrix, self.atom_radius, self.epsilon)
+        self.coulomb = coulomb_energy(self.dist_matrix, self.charge_matrix)
+        self.energy = self.spring + self.lennard + self.coulomb
+
+    def copy(self):
         return AtomChain(
             self.atoms, self.charges,
             spring_const=self.spring_const,
@@ -92,5 +109,13 @@ class AtomChain:
             atom_radius=self.atom_radius,
             epsilon=self.epsilon,
             boltzmann_const=self.boltzmann_const,
-            temperature=self.temperature
+            temperature=self.temperature,
+            dist_matrix=self.dist_matrix,
+            charge_matrix=self.charge_matrix,
+            spring=self.spring,
+            lennard=self.lennard,
+            coulomb=self.coulomb,
+            energy=self.energy,
+            last_index=self.last_index,
+            rebuild=False
         )

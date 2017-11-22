@@ -3,9 +3,10 @@ import multiprocessing as mp
 import pandas as pd
 from scipy.spatial.distance import *
 from scipy.spatial import distance_matrix
+from scipy.linalg import svd as spsvd
 from sklearn.metrics.pairwise import euclidean_distances
 
-from util import pairwise_dist, straight_chain
+from util import pairwise_dist, straight_chain, inv_pairwise_dist
 from item import *
 
 
@@ -164,4 +165,25 @@ def multiproc_kwarg():
     pool = mp.Pool(3)
     kw = {'num': 5}
     pool.map(irepeat, [('a', kw), ('b', kw), ('c', kw)])
+
+
+def svd_scipy(a):
+    return spsvd(a, full_matrices=False, check_finite=False)
+
+
+def svd_numpy(a):
+    return np.linalg.svd(a, full_matrices=False)
+
+
+def inv_dist_mat_1(a):
+    return inv_pairwise_dist(a)
+
+
+def inv_dist_mat_2(a):
+    dist_mat = np.empty((a.shape[0], a.shape[0]))
+    for i in range(a.shape[0]):
+        for j in range(a.shape[0]):
+            dist_mat[i, j] = np.sum(np.square(a[i] - a[j]))
+    np.fill_diagonal(dist_mat, np.inf)
+    return np.invsqrt(dist_mat)
 
