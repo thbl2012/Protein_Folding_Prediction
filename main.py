@@ -1,63 +1,11 @@
-import numpy as np
 import os
-from matplotlib import pyplot as plt, colors
-from atom_chain import AtomChain
+
+import numpy as np
 
 import data
 import simulate
-from util import wild_type
-
-
-def run_to_corr_matrices(run_matrix, out_0=None, out_1=None):
-    print('runs shape: {}'.format(str(run_matrix.shape)))
-    num_runs, t, num_atoms, atom_dim = run_matrix.shape
-    num_features = num_atoms * atom_dim
-    run_matrix = run_matrix.reshape(num_runs, t, num_features)
-    print('runs reshape: {}'.format(str(run_matrix.shape)))
-    run_corr_matrix = np.empty((t, num_features, num_features))
-    for i in range(t):
-        run_corr_matrix[i] = correlation_matrix(run_matrix[:, i, :])
-    run_corr_matrix_0 = np.copy(run_corr_matrix)
-    for i in range(t):
-        np.fill_diagonal(run_corr_matrix_0[i], 0)
-    if out_1:
-        np.save(out_1, run_corr_matrix.reshape(t, num_features**2),
-                allow_pickle=False, fix_imports=False)
-    if out_0:
-        np.save(out_0, run_corr_matrix_0.reshape(t, num_features ** 2),
-                allow_pickle=False, fix_imports=False)
-    return run_corr_matrix_0, run_corr_matrix
-
-
-def correlation_matrix(feature_arr):
-    print('feature_arr shape: {}'.format(str(feature_arr.shape)))
-    feature_mean = np.mean(feature_arr, axis=0)
-    num_runs, num_features = feature_arr.shape
-    pairwise_prod_matrices = np.empty((num_runs, num_features, num_features))
-    for i in range(feature_arr.shape[0]):
-        pairwise_prod_matrices[i] = feature_arr[i].reshape(-1, 1) * feature_arr[i]
-    pairwise_prod_mean = np.mean(pairwise_prod_matrices, axis=0)
-    pairwise_mean_prod = feature_mean.reshape(-1, 1) * feature_mean
-
-    self_corr = np.sqrt(pairwise_prod_mean.diagonal(0) - np.square(feature_mean))
-    self_corr_matrix = self_corr.reshape(-1, 1) * self_corr
-    results = (pairwise_prod_mean - pairwise_mean_prod) / self_corr_matrix
-    results[~np.isfinite(results)] = 0
-    return results
-
-
-def visualize(matrix, fig_out=None, show=False):
-    cmap = colors.LinearSegmentedColormap.from_list(
-        'cmap', ['blue', 'white', 'red'], 256
-    )
-    img = plt.imshow(matrix, cmap=cmap, interpolation='nearest', origin='upper')
-    plt.colorbar(img, cmap=cmap)
-    plt.suptitle = 'mcs={}'.format(fig_out)
-    if fig_out:
-        plt.savefig(fig_out, format='png', dpi=600)
-    if show:
-        plt.show()
-    plt.close()
+from atom_chain import AtomChain
+from correlation import run_to_corr_matrices, visualize
 
 
 def main(
@@ -94,6 +42,7 @@ def main(
     samples: np.ndarray = None
     equil_seed: AtomChain = None
     corr_matrices: np.ndarray = None
+    runs: np.ndarray = None
 
     if mode == 're_simulate':
         if not sim_params:
@@ -121,6 +70,7 @@ def main(
             raise ValueError('No parameters supplied for short re-simulation')
         if ref_config is None:
             ref_config = data.load_ref_config(ref_config_path)
+        if equil_seed is None:
             equil_seed = data.load_chain_from_file(equil_seed_path)
         chain = AtomChain(ref_config, sim_short_charges,
                           spring_const=equil_seed.spring_const,
@@ -130,7 +80,12 @@ def main(
                           boltzmann_const=equil_seed.boltzmann_const,
                           temperature=equil_seed.temperature,
                           rebuild=True)
-        runs = simulate.repeat_simulate_short(chain, **sim_short_params, out=runs_path)
+        runs = simulate.repeat_simulate_short(chain, **sim_short_params)
+        data.save_runs(runs, runs_path)
+        mode = 're_corr_matrices'
+    if mode == 're_corr_matrices':
+        if runs is None:
+            runs = data.load_runs(runs_path)
         corr_matrices = run_to_corr_matrices(runs, out_0=corr_diag_path_0, out_1=corr_diag_path_1)
 
     # Visualization
@@ -142,7 +97,6 @@ def main(
                 fig_out='{}/{}.png'.format(fig_paths[i], t * sim_short_params['save_period']),
                 show=False
             )
-    return
 
 
 def run(charge_seq, charge_seq_name, mode):
@@ -186,7 +140,11 @@ def run(charge_seq, charge_seq_name, mode):
 
 if __name__ == '__main__':
     charges = np.full(30, 0)
-    for i in range(15):
-        charges[i*2+1] = 2
-    name = 'alt_0_2'
+    i = 1
+    q = 2
+    while i < 30:
+        charges[i] = q
+        q = -q
+        i += 2
+    name = 'wild_type'
     run(charges, name, 're_short_sim')

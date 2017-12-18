@@ -12,8 +12,8 @@ class AtomChain:
                  lennard=0., spring=0., coulomb=0.,
                  energy=0., last_index=None,
                  rebuild=False,):
-        self.atoms = atoms
-        self.charges = charges
+        self.atoms = np.copy(atoms)
+        self.charges = np.copy(charges)
         self.atom_radius = atom_radius
         self.spring_const = spring_const
         self.spring_len = spring_len

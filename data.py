@@ -41,15 +41,20 @@ def load_chain_from_file(from_file):
                      )
 
 
+def save_runs(runs: np.ndarray, out):
+    np.save(out, runs, allow_pickle=False, fix_imports=False)
+
+
+def load_runs(from_file):
+    return np.load(from_file, allow_pickle=False, fix_imports=False, encoding="bytes")
+
+
 def get_sample_equil(from_file):
-    samples_raw = np.load(from_file, allow_pickle=False,
-                          fix_imports=False, encoding='bytes')
-    return samples_raw.reshape(samples_raw.shape[0], -1, 3)
+    return np.load(from_file, allow_pickle=False, fix_imports=False, encoding='bytes')
 
 
 def save_samples_to_file(samples, to_file):
-    np.save(to_file, samples.reshape(len(samples), -1),
-            allow_pickle=False, fix_imports=False)
+    np.save(to_file, samples, allow_pickle=False, fix_imports=False)
 
 
 def save_ref_config(ref_config, to_file):

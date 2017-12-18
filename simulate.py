@@ -151,7 +151,6 @@ def simulate_short(
         trial_no=1000,
         save_period=50,
 ):
-    chain = chain.copy()
     states = np.empty(
         (trial_no//save_period, chain.atoms.shape[0], chain.atoms.shape[1]),
         dtype=np.float64
@@ -169,15 +168,13 @@ def repeat_simulate_short(
         trial_no=1000,
         num_repeat=1000,
         save_period=50,
-        out=None,
 ):
     runs = np.empty((num_repeat, trial_no//save_period,
                      chain.atoms.shape[0], chain.atoms.shape[1]))
     for i in range(num_repeat):
-        runs[i] = simulate_short(chain, max_dist=max_dist, trial_no=trial_no, save_period=save_period)
-        print(i+1)
-    if out:
-        np.save(out, runs.reshape(num_repeat, -1), allow_pickle=False, fix_imports=False)
+        chain_copied = chain.copy()
+        runs[i] = simulate_short(chain_copied, max_dist=max_dist, trial_no=trial_no, save_period=save_period)
+        # print(i+1)
     return runs
 
 

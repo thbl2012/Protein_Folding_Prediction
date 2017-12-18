@@ -1,4 +1,4 @@
-from main import load_chain_from_file
+from data import load_chain_from_file
 
 
 def get_pdb_from_atoms(atoms):
