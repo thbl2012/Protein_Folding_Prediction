@@ -1,11 +1,9 @@
 .idea/
-chains/
-figs/
 report/
 run/
 __pycache__/
 backup/
-test_options/
 test_item.npy
 test_item.py
 *.png
+test/test_options/

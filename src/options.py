@@ -1,4 +1,3 @@
-import numpy as np
 import multiprocessing as mp
 import pandas as pd
 from scipy.spatial.distance import *
@@ -6,8 +5,8 @@ from scipy.spatial import distance_matrix
 from scipy.linalg import svd as spsvd
 from sklearn.metrics.pairwise import euclidean_distances
 
-from util import pairwise_dist, straight_chain, inv_pairwise_dist
-from item import *
+from util import inv_pairwise_dist
+from deprecated.item import *
 
 
 def dist_matrix_scipy_1(npl):

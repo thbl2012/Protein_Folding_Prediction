@@ -119,8 +119,9 @@ def run(charge_seq, charge_seq_name, mode):
     }
     sim_short_params = {
         'max_dist': 5,
-        'trial_no': 1000,
-        'save_period': 50,
+        'trial_no': 100,
+        'save_period': 5,
+        'num_repeat': 100000
     }
     sample_params = {
         'max_dist': 0.5,

@@ -6,7 +6,7 @@ import time
 from matplotlib import pyplot
 
 from atom_chain import AtomChain, straight_chain, wild_type
-from item import get_filename, to_item, load_or_make_items, save_items, iadd_items
+from deprecated.item import get_filename, to_item, load_or_make_items, save_items, iadd_items
 
 # Storage parameters
 STATUS_FILE = 'status.txt'

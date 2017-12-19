@@ -2,7 +2,7 @@ from typing import Optional
 
 from typing.io import IO
 
-from old_simulate import *
+from deprecated.old_simulate import *
 
 
 def read_chain(file):
