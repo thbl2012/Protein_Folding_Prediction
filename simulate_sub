@@ -1,9 +1,0 @@
-#!/bin/bash -l
-#
-#PBS -P Personal
-#PBS -m e
-#PBS -M thbl.2012@gmail.com
-#PBS -l select=1:ncpus=24
-module unload python
-module load python/intel-3.5
-python /home/users/nus/a0112184/simulate/simulate_parallel.py

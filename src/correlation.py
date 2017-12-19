@@ -37,17 +37,22 @@ def correlation_matrix(feature_arr):
     self_corr = np.sqrt(pairwise_prod_mean.diagonal(0) - np.square(feature_mean))
     self_corr_matrix = self_corr.reshape(-1, 1) * self_corr
     results = (pairwise_prod_mean - pairwise_mean_prod) / self_corr_matrix
-    results[~np.isfinite(results)] = 0
+    results[outlier_matrix(feature_arr)] = 0
     return results
+
+
+def outlier_matrix(feature_arr):
+    no_change = (feature_arr.max(axis=0) - feature_arr.min(axis=0)) < 0.001
+    return no_change.reshape(-1, 1) | no_change
 
 
 def visualize(matrix, fig_out=None, show=False):
     cmap = colors.LinearSegmentedColormap.from_list(
         'cmap', ['blue', 'white', 'red'], 256
     )
-    cmap.set_under(color='navy')
-    cmap.set_over(color='crimson')
-    img = plt.imshow(matrix, cmap=cmap, vmin=-0.8, vmax=0.8, interpolation='nearest', origin='upper')
+    cmap.set_under(color='white')
+    cmap.set_over(color='white')
+    img = plt.imshow(matrix, cmap=cmap, vmin=-0.95, vmax=0.95, interpolation='nearest', origin='upper')
     plt.colorbar(img, cmap=cmap)
     plt.suptitle = 'mcs={}'.format(fig_out)
     if fig_out:

@@ -11,7 +11,7 @@ co = np.load('debug/corr.npy')
 abn = []
 for i in range(90):
     for j in range(90):
-        if co[i, j] > 1.1:
+        if co[i, j] > 0.75:
             abn.append((i, j))
 
 
