@@ -1,10 +1,9 @@
 import numpy as np
 import random
-import pymol
 
 from matplotlib import pyplot
 
-from atom_chain import AtomChain, straight_chain, wild_type
+from src.atom_chain import AtomChain, straight_chain, wild_type
 
 
 # Storage parameters
@@ -32,6 +31,7 @@ def simulate_equil(
         trial_no=10000000,
 
         # Plot parameters
+        enable_plot=True,
         plot_period=100,
         max_plot_buffer=10000,
         verbose=False,
@@ -51,7 +51,7 @@ def simulate_equil(
     if chain_type == 'wild_type':
         charges = wild_type(length)
     chain = AtomChain(
-        straight_chain(len(charges), start_dist),
+        straight_chain(len(charges), start_dist=start_dist),
         charges,
         spring_const=spring_const,
         spring_len=spring_len,
@@ -77,16 +77,20 @@ def simulate_equil(
     for t in range(1, trial_no+1):
         accepted = chain.mutate(max_dist)
         accepted_count += accepted
+        if print_period > 0 and t % print_period == 0:
+            print(t)
+        if not enable_plot:
+            continue
+        # Code for plotting
         if t % plot_period == 0:
             for label, plot in plots.items():
                 plot[plot_count] = getattr(chain, label)
             trial_plot[plot_count] = t
             plot_count += 1
-        if print_period > 0 and t % print_period == 0:
-            print(t)
+
         if plot_count == max_plot_buffer or t == trial_no:
             for label, plot in plots.items():
-                plot[plot > 200] = 0
+                plot[plot > 200] = 200
                 pyplot.plot(trial_plot, plot, label=label, color=colors[label], **kwargs)
             for _, plot in plots.items():
                 plot.fill(0)
@@ -182,16 +186,16 @@ def sandbox():
     sim_params = {
         'length': 30,
         'chain_type': 'wild_type',
-        'spring_len': 1.,
+        'spring_len': 10.,
         'spring_const': 1.,
-        'atom_radius': 0.5,
+        'atom_radius': 1.,
         'epsilon': 1.,
         'boltzmann_const': 1.,
         'temperature': 1.,
         'max_dist': 3.,
-        'start_dist': 1.,
-        'trial_no': 10000000,
-        'plot_period': 100,
+        'start_dist': 10.,
+        'trial_no': 1000,
+        'plot_period': 1,
         'max_plot_buffer': 10000,
         'verbose': False,
         'colors': None,
@@ -199,7 +203,7 @@ def sandbox():
         'print_period': 1000,
         'chain_out': None
     }
-    simulate_equil(**sim_params)
+    return simulate_equil(**sim_params)
 
 
 if __name__ == '__main__':

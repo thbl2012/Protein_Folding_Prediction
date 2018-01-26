@@ -1,11 +1,9 @@
 import os
 
-import numpy as np
-
-import data
-import simulate
-from atom_chain import AtomChain
-from correlation import run_to_corr_matrices, visualize
+from src import simulate, data
+from src.atom_chain import AtomChain
+from src.correlation import run_to_corr_matrices, visualize
+from src.charge_sequences import *
 
 
 def main(
@@ -28,13 +26,14 @@ def main(
     fig_names = ('corr_diag_0', 'corr_diag_1')
     length = 30
 
-    data_dir = '{}/data'.format(run_dir)
+    data_dir = '{}/ref_config'.format(run_dir)
+    short_sim_dir = '{}/short_sim'.format(run_dir)
     ref_config_path = '{}/{}.npy'.format(data_dir, ref_config_name)
     samples_path = '{}/{}.npy'.format(data_dir, samples_name)
     equil_seed_path = '{}/{}.npy'.format(data_dir, equil_seed_name)
-    runs_path = '{}/{}.npy'.format(data_dir, runs_name)
-    corr_diag_path_0 = '{}/{}.npy'.format(data_dir, corr_diag_name_0)
-    corr_diag_path_1 = '{}/{}.npy'.format(data_dir, corr_diag_name_1)
+    runs_path = '{}/{}'.format(short_sim_dir, charge_seq_name)
+    corr_diag_path_0 = '{}/{}/{}.npy'.format(short_sim_dir, charge_seq_name, corr_diag_name_0)
+    corr_diag_path_1 = '{}/{}/{}.npy'.format(short_sim_dir, charge_seq_name, corr_diag_name_1)
     fig_paths = ('{}/{}/{}'.format(fig_dir, charge_seq_name, fig_names[0]),
                  '{}/{}/{}'.format(fig_dir, charge_seq_name, fig_names[1]))
 
@@ -66,6 +65,7 @@ def main(
         data.save_ref_config(ref_config, ref_config_path)
         mode = 're_short_sim'
     if mode == 're_short_sim':
+        os.makedirs(runs_path, exist_ok=True)
         if not sim_short_params:
             raise ValueError('No parameters supplied for short re-simulation')
         if ref_config is None:
@@ -81,12 +81,14 @@ def main(
                           temperature=equil_seed.temperature,
                           rebuild=True)
         runs = simulate.repeat_simulate_short(chain, **sim_short_params)
-        data.save_runs(runs, runs_path)
+        data.save_runs(runs, '{}/{}.npy'.format(runs_path, runs_name))
         mode = 're_corr_matrices'
     if mode == 're_corr_matrices':
         if runs is None:
             runs = data.load_runs(runs_path)
-        corr_matrices = run_to_corr_matrices(runs, out_0=corr_diag_path_0, out_1=corr_diag_path_1)
+        corr_matrices = run_to_corr_matrices(runs)
+        np.save(corr_diag_path_0, corr_matrices[0], allow_pickle=False, fix_imports=False)
+        np.save(corr_diag_path_1, corr_matrices[1], allow_pickle=False, fix_imports=False)
 
     # Visualization
     for i in range(2):
@@ -97,6 +99,11 @@ def main(
                 fig_out='{}/{}.png'.format(fig_paths[i], t * sim_short_params['save_period']),
                 show=False
             )
+    # Save charges
+    with open('{}/{}/charges.txt'.format(fig_dir, charge_seq_name), 'w', encoding='utf-8') as txt:
+        print('name: ' + charge_seq_name, file=txt)
+        print('charges: ', ', '.join(['{:+.2f}'.format(e) for e in sim_short_charges]), sep=': ', file=txt)
+    np.save('{}/{}'.format(runs_path, 'charges.npy'), sim_short_charges, allow_pickle=False, fix_imports=False)
 
 
 def run(charge_seq, charge_seq_name, mode):
@@ -119,9 +126,9 @@ def run(charge_seq, charge_seq_name, mode):
     }
     sim_short_params = {
         'max_dist': 5,
-        'trial_no': 100,
-        'save_period': 5,
-        'num_repeat': 100000
+        'trial_no': 1000,
+        'save_period': 50,
+        'num_repeat': 10000
     }
     sample_params = {
         'max_dist': 0.5,
@@ -140,12 +147,8 @@ def run(charge_seq, charge_seq_name, mode):
 
 
 if __name__ == '__main__':
-    charges = np.full(30, 0)
-    i = 1
-    q = 2
-    while i < 30:
-        charges[i] = q
-        q = -q
-        i += 2
-    name = 'wild_type'
+    k = 0
+    Q = 0
+    name = 'halfwt_{:02d}_{:02d}'.format(k, Q)
+    charges = np.concatenate((full(Q, length=k+1), wild_type(2., length=30)[k+1:]), axis=0)
     run(charges, name, 're_short_sim')

@@ -176,13 +176,3 @@ def svd_numpy(a):
 
 def inv_dist_mat_1(a):
     return inv_pairwise_dist(a)
-
-
-def inv_dist_mat_2(a):
-    dist_mat = np.empty((a.shape[0], a.shape[0]))
-    for i in range(a.shape[0]):
-        for j in range(a.shape[0]):
-            dist_mat[i, j] = np.sum(np.square(a[i] - a[j]))
-    np.fill_diagonal(dist_mat, np.inf)
-    return np.invsqrt(dist_mat)
-

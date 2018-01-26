@@ -5,37 +5,17 @@ from scipy.spatial.distance import pdist, squareform
 #     return Random().uniform(-s, s)
 
 
-def get_charge(name='wild_type', length=30):
-    if name == 'wild_type':
-        charges = np.empty(length)
-        a = 2
-        i = 0
-        while i < length:
-            charges[i] = 0
-            charges[i + 1] = a
-            a = -a
-            i += 2
-        return charges
-    elif name == 'mutant':
-        charges = get_charge('wild_type', length=length)
-        charges[1] = 0
-        return charges
-    elif name == 'all_zeros':
-        return np.zeros(length)
-    elif name == 'all_twos':
-        return np.full(length, 2)
-    else:
-        raise ValueError('Charge sequence undefined')
-
-
 def random_position(p, s):
     return p + s*np.random.RandomState().random_sample(3)*2-s
 
 
-def straight_chain(length, start_dist):
+def straight_chain(length, start_pos=None, start_dist=1.0):
+    if start_pos is None:
+        start_pos = np.zeros(3)
     chain = np.zeros((length, 3))
     for i in range(length):
-        chain[i][2] = start_dist*i
+        chain[i] = start_pos
+        chain[i][2] += start_dist * i
     return chain
 
 

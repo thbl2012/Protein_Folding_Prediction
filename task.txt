@@ -1,0 +1,6 @@
+put charge and sequence number
+check java code from prof
+check keras python code from prof
+wait for tensorflow 1.5 to integrate with GPU OR use CUDA 8.0 instead of 9.0
+build tensorflow from source to get AVX support
+first goal: classify WildType vs NotWildType

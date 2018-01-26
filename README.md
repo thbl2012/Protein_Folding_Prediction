@@ -66,6 +66,8 @@ Find a way to mutate some atoms in the chain so that the resulting correlation m
 ### Simulation
 - [ ] Possibly always stuck in a local minimum
 - [ ] Try Bayesian Optimization (Break into 5-6 subchains) to find minimum
+- [ ] Try reducing the variation near the equilibrium
+- [ ] Try increasing probability of acceptance at the beginning
 ### Correlation
 - [ ] Most features (coordinates) never changed fast enough to collect meaningful correlations
 - [ ] Try:

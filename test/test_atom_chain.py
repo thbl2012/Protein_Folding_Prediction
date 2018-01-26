@@ -34,7 +34,7 @@ def lennard_energy(dist_matrix, atom_radius, epsilon):
 def test_chain():
     l = 30
     return AtomChain(
-        straight_chain(l, 10.),
+        straight_chain(l, start_dist=10.),
         wild_type(l),
         spring_len=10.,
         spring_const=1.,
@@ -125,4 +125,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()

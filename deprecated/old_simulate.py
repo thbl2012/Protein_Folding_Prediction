@@ -41,7 +41,7 @@ def simulate_sandbox(
     if chain_type == 'wild_type':
         charges = wild_type(length)
     chain = AtomChain(
-        straight_chain(len(charges), start_dist),
+        straight_chain(len(charges), start_dist=start_dist),
         charges,
         spring_const=spring_const,
         spring_len=spring_len,
@@ -114,7 +114,7 @@ def simulate_true(
         save_dir = 'D:/Coding Projects/Python/FYP/run'
     os.makedirs('{}/run_{:04d}'.format(save_dir, run_id), exist_ok=True)
     chain = AtomChain(
-        straight_chain(len(charges), start_dist),
+        straight_chain(len(charges), start_dist=start_dist),
         charges,
         spring_const=spring_const,
         spring_len=spring_len,

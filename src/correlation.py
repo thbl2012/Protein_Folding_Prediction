@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import colors, pyplot as plt
 
 
-def run_to_corr_matrices(run_matrix, out_0=None, out_1=None):
+def run_to_corr_matrices(run_matrix):
     print('runs shape: {}'.format(str(run_matrix.shape)))
     num_runs, t, num_atoms, atom_dim = run_matrix.shape
     num_features = num_atoms * atom_dim
@@ -16,12 +16,6 @@ def run_to_corr_matrices(run_matrix, out_0=None, out_1=None):
     run_corr_matrix_0 = np.copy(run_corr_matrix)
     for i in range(t):
         np.fill_diagonal(run_corr_matrix_0[i], 0)
-    if out_1:
-        np.save(out_1, run_corr_matrix.reshape(t, num_features**2),
-                allow_pickle=False, fix_imports=False)
-    if out_0:
-        np.save(out_0, run_corr_matrix_0.reshape(t, num_features ** 2),
-                allow_pickle=False, fix_imports=False)
     return run_corr_matrix_0, run_corr_matrix
 
 

@@ -1,6 +1,6 @@
 import numpy as np
-import simulate
-from atom_chain import AtomChain
+from src import simulate
+from src.atom_chain import AtomChain
 
 
 def save_chain_to_file(chain: AtomChain, to_file):
@@ -71,3 +71,4 @@ def get_ref_config(samples, ref_method='centroid'):
     else:
         raise ValueError('Invalid reference method')
     return ref_config
+

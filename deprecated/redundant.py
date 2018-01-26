@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from typing.io import IO
@@ -15,8 +16,8 @@ def read_chain(file):
             atoms.append(tuple(map(lambda x: float(x), re.split(',', line))))
         file.close()
     except FileNotFoundError:
-        atoms = straight_chain(30)
-    return AtomChain(atoms, wild_type())
+        atoms = straight_chain(30, start_dist=1.0)
+    return AtomChain(atoms, wild_type(30))
 
 
 def save_chain(atoms, filename):

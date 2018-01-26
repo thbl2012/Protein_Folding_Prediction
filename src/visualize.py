@@ -1,28 +1,36 @@
-from data import load_chain_from_file
+from src.data import load_chain_from_file
 
 
-def get_pdb_from_atoms(atoms):
-    name = 'atoms.pdb'
-    with open(name, 'w', encoding='utf-8') as file:
-        # print("HEADER    MY ATOMS                    08-NOV-17   1A31", file=file)
-        # print("TITLE     MY ATOMS", file=file)
-        # print("SEQRES   1 A    9  PRO PRO GLY PRO PRO GLY PRO PRO GLY", file=file)
-        # print("SEQRES   1 B    6  PRO PRO GLY PRO PRO GLY", file=file)
-        # print("SEQRES   1 C    6  PRO PRO GLY PRO PRO GLY", file=file)
+def print_atoms_to_pdb(to_pdb, atoms, temp, atom_type='H'):
+    with open(to_pdb, 'w', encoding='utf-8') as file:
         for i in range(atoms.shape[0]):
-            print('ATOM {} C PRO A 1 {:.3f} {:.3f} {:.3f} 1.00 1.00 C'.format(i+1, *atoms[i]), file=file)
-    return name
+            print(get_pdb_line(atom_no=i+1, atom_name=atom_type, res_name='PRO',
+                               chain_id='', res_no=i+1, x=atoms[i, 0],
+                               y=atoms[i, 1], z=atoms[i, 2], occup=0.0,
+                               temp=temp, symb=atom_type), file=file)
+    return
+
+
+def get_pdb_line(
+        atom_no, atom_name, res_name,
+        chain_id, res_no, x, y, z,
+        occup, temp, symb,
+):
+    s1 = 'ATOM  {:5d} {:4s} {:>3s} {:1s}{:4d}    '.format(
+        atom_no, atom_name, res_name, chain_id, res_no
+    )
+    s2 = '{:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}          {:1s}'.format(
+        x, y, z, occup, temp, symb
+    )
+    return s1 + s2
 
 
 def main():
-    chain_name = 'wild_type'
-    run_dir = 'run'
+    run_dir = 'run/data'
     equil_seed_name = 'equil_seed'
-    save_dir = '{}/{}'.format(run_dir, chain_name)
-    equil_seed_path = '{}/{}.npy'.format(save_dir, equil_seed_name)
-    atoms = load_chain_from_file(equil_seed_path)
-    filename = get_pdb_from_atoms(atoms)
-    return filename
+    equil_seed_path = '{}/{}.npy'.format(run_dir, equil_seed_name)
+    chain = load_chain_from_file(equil_seed_path)
+    print_atoms_to_pdb('atoms.pdb', chain.atoms, temp=1.0, atom_type='H')
 
 
 if __name__ == '__main__':

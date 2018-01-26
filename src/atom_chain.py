@@ -1,6 +1,6 @@
 from scipy.spatial import distance_matrix
 
-from util import *
+from src.util import *
 
 
 class AtomChain:

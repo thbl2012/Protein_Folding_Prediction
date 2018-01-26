@@ -5,14 +5,8 @@ mpl.use('TkAgg')
 from matplotlib import pyplot as plt
 
 
-fa = np.load('debug/feature_arr.npy')
-co = np.load('debug/corr.npy')
-
-abn = []
-for i in range(90):
-    for j in range(90):
-        if co[i, j] > 0.75:
-            abn.append((i, j))
+runs = None
+corr = None
 
 
 def correlation_matrix_debug(feature_arr):
@@ -28,4 +22,19 @@ def correlation_matrix_debug(feature_arr):
     self_corr_matrix = self_corr.reshape(-1, 1) * self_corr
     results = (pairwise_prod_mean - pairwise_mean_prod) / self_corr_matrix
     results[~np.isfinite(results)] = 0
-    return results, pairwise_prod_matrices, pairwise_prod_mean, pairwise_mean_prod, self_corr, self_corr_matrix
+    return results, pairwise_prod_matrices, pairwise_prod_mean, pairwise_mean_prod, self_corr,
+
+
+def get_fa(idx):
+    global runs
+    if runs is None:
+        runs = np.load('run/data/runs.npy', fix_imports=False, allow_pickle=False)
+    return runs[idx]
+
+
+def get_co(idx):
+    global corr
+    if corr is None:
+        corr = np.load('run/data/corr_diag_0.npy', fix_imports=False, allow_pickle=False)
+    return corr[idx]
+
