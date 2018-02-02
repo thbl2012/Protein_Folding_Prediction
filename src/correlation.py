@@ -5,11 +5,11 @@ from matplotlib import colors, pyplot as plt
 
 
 def run_to_corr_matrices(run_matrix):
-    print('runs shape: {}'.format(str(run_matrix.shape)))
+    # print('runs shape: {}'.format(str(run_matrix.shape)))
     num_runs, t, num_atoms, atom_dim = run_matrix.shape
     num_features = num_atoms * atom_dim
     run_matrix = run_matrix.reshape(num_runs, t, num_features)
-    print('runs reshape: {}'.format(str(run_matrix.shape)))
+    # print('runs reshape: {}'.format(str(run_matrix.shape)))
     run_corr_matrix = np.empty((t, num_features, num_features))
     for i in range(t):
         run_corr_matrix[i] = correlation_matrix(run_matrix[:, i, :])

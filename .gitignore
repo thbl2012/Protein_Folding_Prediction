@@ -1,6 +1,7 @@
 .idea/
 report/
 run/
+data_cnn/
 __pycache__/
 backup/
 test_item.npy

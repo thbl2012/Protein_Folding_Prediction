@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from numba import guvectorize
 
 from matplotlib import pyplot
 
@@ -29,6 +30,8 @@ def simulate_equil(
         max_dist=1.,
         start_dist=1.,
         trial_no=10000000,
+        shrink_factor=1.,
+        shrink_period=np.inf,
 
         # Plot parameters
         enable_plot=True,
@@ -73,8 +76,14 @@ def simulate_equil(
     pyplot.xlabel('trial')
     kwargs = {'linestyle': 'None', 'markersize': 1, 'marker': '+'}
 
+    # Legend
+    for label in plots.keys():
+        pyplot.plot([], label=label, color=colors[label])
+
     # Begin simulation
     for t in range(1, trial_no+1):
+        if t % shrink_period == 0:
+            max_dist = max_dist * shrink_factor
         accepted = chain.mutate(max_dist)
         accepted_count += accepted
         if print_period > 0 and t % print_period == 0:
@@ -91,11 +100,14 @@ def simulate_equil(
         if plot_count == max_plot_buffer or t == trial_no:
             for label, plot in plots.items():
                 plot[plot > 200] = 200
-                pyplot.plot(trial_plot, plot, label=label, color=colors[label], **kwargs)
+                pyplot.plot(trial_plot, plot, color=colors[label], **kwargs)
             for _, plot in plots.items():
                 plot.fill(0)
             trial_plot.fill(0)
             plot_count = 0
+
+    # Legend
+    pyplot.legend()
 
     # Save figure and chain
     if fig_out:
@@ -178,32 +190,34 @@ def repeat_simulate_short(
     for i in range(num_repeat):
         chain_copied = chain.copy()
         runs[i] = simulate_short(chain_copied, max_dist=max_dist, trial_no=trial_no, save_period=save_period)
-        # print(i+1)
     return runs
 
 
 def sandbox():
-    sim_params = {
-        'length': 30,
-        'chain_type': 'wild_type',
-        'spring_len': 10.,
-        'spring_const': 1.,
-        'atom_radius': 1.,
-        'epsilon': 1.,
-        'boltzmann_const': 1.,
-        'temperature': 1.,
-        'max_dist': 3.,
-        'start_dist': 10.,
-        'trial_no': 1000,
-        'plot_period': 1,
-        'max_plot_buffer': 10000,
-        'verbose': False,
-        'colors': None,
-        'fig_out': 'sim.png',
-        'print_period': 1000,
-        'chain_out': None
-    }
-    return simulate_equil(**sim_params)
+    return simulate_equil(
+        length=30,
+        chain_type='wild_type',
+        spring_len=1.,
+        spring_const=1.,
+        atom_radius=1.,
+        epsilon=1.,
+        boltzmann_const=1.,
+        temperature=0.5,
+
+        max_dist=5.,
+        start_dist=1.,
+        trial_no=10000000,
+        shrink_factor=1.,
+        shrink_period=np.inf,
+
+        plot_period=100,
+        max_plot_buffer=10000,
+        verbose=False,
+        colors=None,
+        fig_out='sim.png',
+        print_period=1000,
+        chain_out=None
+    )
 
 
 if __name__ == '__main__':

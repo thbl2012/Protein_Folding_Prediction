@@ -29,7 +29,7 @@ class AtomChain:
             self.energy = self.spring + self.lennard + self.coulomb
             self.last_index = last_index
         else:
-            self.dist_matrix = dist_matrix
+            self.dist_matrix = np.copy(dist_matrix)
             self.charge_matrix = charge_matrix
             self.spring = spring
             self.lennard = lennard
@@ -92,6 +92,34 @@ class AtomChain:
             accepted = 1
         self.last_index = i
         return accepted
+
+    def test_mutate(self, max_dist):
+        rand = np.random.RandomState()
+        i = rand.randint(0, len(self.atoms))
+        p = random_position(self.atoms[i], max_dist)
+
+        # Compute energy difference
+        v = self.get_trial_dist_vector(p)
+        spring_diff = self.spring_diff(i, v)
+        lennard_diff = self.lennard_diff(i, v)
+        coulomb_diff = self.coulomb_diff(i, v)
+        energy_diff = spring_diff + lennard_diff + coulomb_diff
+
+        # Generate acceptance decision
+        accepted = 0
+        uni = rand.uniform(0, 1)
+        old = self.energy
+        new = old + energy_diff
+        prob = np.exp(- energy_diff / (self.boltzmann_const * self.temperature))
+        if uni < prob:
+            self.update_position(i, p, v)
+            self.energy += energy_diff
+            self.spring += spring_diff
+            self.lennard += lennard_diff
+            self.coulomb += coulomb_diff
+            accepted = 1
+        self.last_index = i
+        return {'acc': accepted, 'r': uni, 'p': prob, 'old': old, 'new': new, 'd': v[i]}
 
     def recompute(self):
         self.dist_matrix = pairwise_dist(self.atoms)
