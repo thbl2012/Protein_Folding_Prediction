@@ -38,7 +38,27 @@ def test_simulate_short(
     )
     i = 0
     for t in range(1, trial_no+1):
-        chain.mutate(max_dist)
+        rand = np.random.RandomState()
+        i = rand.randint(0, len(atoms))
+        p = random_position(atoms[i], max_dist)
+
+        # Compute energy difference
+        v = self.get_trial_dist_vector(p)
+        spring_diff = self.spring_diff(i, v)
+        lennard_diff = self.lennard_diff(i, v)
+        coulomb_diff = self.coulomb_diff(i, v)
+        energy_diff = spring_diff + lennard_diff + coulomb_diff
+
+        # Generate acceptance decision
+        accepted = 0
+        if rand.uniform(0, 1) < np.exp(- energy_diff / (self.boltzmann_const * self.temperature)):
+            self.update_position(i, p, v)
+            self.energy += energy_diff
+            self.spring += spring_diff
+            self.lennard += lennard_diff
+            self.coulomb += coulomb_diff
+            accepted = 1
+        self.last_index = i
         if t == save_period[i]:
             states[i] = chain.atoms
             i += 1

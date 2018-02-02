@@ -4,7 +4,7 @@ import ipyparallel as ipp
 import time
 from numba import jit
 from uuid import uuid4
-from src import data, simulate, charge_sequences
+from src import simulate
 from src.correlation import run_to_corr_matrices
 from src.atom_chain import AtomChain
 
@@ -72,39 +72,8 @@ def repeat_short_sim(
         running_time = time.time() - start
         avg_time += (running_time - avg_time) / i
         rem_time = get_hours(int(avg_time * (repeat - i)))
-        print('{} done out of {}. Time remaining: {}'.format(i, repeat-i, rem_time))
+        print('{} done out of {}. Time remaining: {}'.format(i, repeat, rem_time))
 
 
 def parallel_short_sim():
     pass
-
-
-def main():
-    os.chdir('..')
-    charge_seq = charge_sequences.wild_type(2, length=30)
-    charge_seq_name = 'wild_type'
-    config = get_params('data_cnn/config/params.cfg')
-    ref_config = data.load_ref_config('data_cnn/config/ref_config.npy')
-
-    model_att = ['spring_len', 'spring_const', 'atom_radius', 'epsilon', 'boltzmann_const', 'temperature']
-    model_params = {param: config[param] for param in model_att}
-
-    sim_short_att = ['max_dist', 'trial_no', 'save_period', 'num_repeat']
-    sim_short_params = {param: config[param] for param in sim_short_att}
-    for att in sim_short_att:
-        if att != 'max_dist':
-            sim_short_params[att] = int(sim_short_params[att])
-
-    repeat_short_sim(
-        charge_seq=charge_seq,
-        charge_seq_name=charge_seq_name,
-        model_params=model_params,
-        ref_config=ref_config,
-        sim_short_params=sim_short_params,
-        repeat=30,
-        save_dir='data_cnn/data_raw',
-    )
-
-
-if __name__ == '__main__':
-    main()

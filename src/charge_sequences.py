@@ -32,7 +32,7 @@ def full(q=2., length=30, **kw):
     return cyclic((q,), length=length, **kw)
 
 
-def wild_type(q=2., length=30, **kw):
+def wild_type_like(q=2., length=30, **kw):
     return cyclic((0, q, 0, -q), length=length, **kw)
 
 
@@ -54,3 +54,13 @@ def step(steps, **kw):
         prev = 0 if i == 0 else steps[i-1][1]
         seq[prev:cur] = q
     return seq
+
+
+predefined = dict(
+    wild_type=wild_type_like(q=2., length=30),
+    mutant_alt_0p2=cyclic((0., 2.), length=30),
+    mutant_p2_to_0=cyclic((0., 0., 0., -2.), length=30),
+    mutant_n2_to_0=cyclic((0., 2., 0., 0.), length=30),
+    mutant_all_0=full(q=0., length=30),
+    mutant_all_p2=full(q=2., length=30),
+)

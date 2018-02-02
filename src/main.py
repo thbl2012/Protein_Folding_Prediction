@@ -4,6 +4,7 @@ from src import simulate, data
 from src.atom_chain import AtomChain
 from src.correlation import run_to_corr_matrices, visualize
 from src.charge_sequences import *
+from src import cuda_simulate
 
 
 def auto_sim(
@@ -189,7 +190,7 @@ def test_auto_sim(
         vec_num_repeat = np.empty(num_repeat, dtype=np.int32)
         vec_save_period = np.arange(0, trial_no, save_period, dtype=np.int32) + save_period
 
-        runs = simulate.test_repeat_simulate_short(
+        runs = cuda_simulate.test_repeat_simulate_short(
             ref_config, sim_short_charges, chain.charge_matrix,
             chain.dist_matrix, chain.spring_const, chain.spring_len,
             chain.atom_radius, chain.epsilon, chain.boltzmann_const,
@@ -264,7 +265,7 @@ def main():
     k = 0
     Q = 0
     name = 'test_wild_type_1'
-    charges = wild_type(q=2, length=30)
+    charges = wild_type_like(q=2, length=30)
     # charges = np.concatenate((full(Q, length=k + 1), wild_type(2., length=30)[k + 1:]), axis=0)
     run(charges, name, 're_short_sim')
 
